@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private final String secretKey = "MySuperSecretKeyThatIsLongEnough123!";
+    private final String secretKey = "Analiseed3senvolvimentodes!stemas";
 
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
