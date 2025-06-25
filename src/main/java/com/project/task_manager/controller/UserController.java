@@ -3,7 +3,10 @@ package com.project.task_manager.controller;
 import com.project.task_manager.model.User;
 import com.project.task_manager.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,22 +37,30 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User newUser) {
-        return userService.findById(id)
-                .map(user -> {
-                    user.setUsername(newUser.getUsername());
-                    user.setEmail(newUser.getEmail());
-                    user.setPasswordHash(newUser.getPasswordHash());
-                    return ResponseEntity.ok(userService.save(newUser));
-                }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id, @RequestBody User user) {
+        try {
+            userService.update(userDetails.getUsername(), id, user);
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body("You are not authorized to update this user.");
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("Username or email already exists or user not found.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (userService.findById(id).isPresent()) {
-            userService.deleteById(id);
-            return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteUser(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
+        try {
+            userService.delete(userDetails.getUsername(), id);
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body("You are not authorized to delete this user.");
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("Username or email already exists or user not found.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.notFound().build();
     }
 }

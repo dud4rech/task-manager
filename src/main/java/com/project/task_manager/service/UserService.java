@@ -20,11 +20,15 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public User save(User user) {
-        return userRepository.save(user);
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 
-    public User register(SignUpRequest request) {
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
+
+    public void register(SignUpRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already in use.");
         }
@@ -39,18 +43,32 @@ public class UserService implements UserDetailsService {
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .build();
 
-        return userRepository.save(newUser);
+        userRepository.save(newUser);
     }
 
-    public Optional<User> findById(Long id) {
-        return userRepository.findById(id);
+    public void update(String username, Long id, User newUser) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (!existingUser.getUsername().equals(username)) {
+            throw new SecurityException("Not authorized to update this user.");
+        }
+
+        existingUser.setUsername(newUser.getUsername());
+        existingUser.setEmail(newUser.getEmail());
+        existingUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
+
+        userRepository.save(existingUser);
     }
 
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
+    public void delete(String username, Long id) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
-    public void deleteById(Long id) {
+        if (!existingUser.getUsername().equals(username)) {
+            throw new SecurityException("Not authorized to delete this user.");
+        }
+
         userRepository.deleteById(id);
     }
 
