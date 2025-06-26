@@ -3,6 +3,8 @@ package com.project.task_manager.service;
 import com.project.task_manager.dto.SignUpRequest;
 import com.project.task_manager.model.User;
 import com.project.task_manager.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,7 +30,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public void register(SignUpRequest request) {
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public void register(@Valid SignUpRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalArgumentException("Username already in use.");
         }
@@ -41,11 +48,13 @@ public class UserService implements UserDetailsService {
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .isActive(true)
                 .build();
 
         userRepository.save(newUser);
     }
 
+    @Transactional
     public void update(String username, Long id, User newUser) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
@@ -61,7 +70,8 @@ public class UserService implements UserDetailsService {
         userRepository.save(existingUser);
     }
 
-    public void delete(String username, Long id) {
+    @Transactional
+    public void softDelete(String username, Long id) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
@@ -69,7 +79,8 @@ public class UserService implements UserDetailsService {
             throw new SecurityException("Not authorized to delete this user.");
         }
 
-        userRepository.deleteById(id);
+        existingUser.setIsActive(false);
+        userRepository.save(existingUser);
     }
 
     @Override
@@ -83,4 +94,16 @@ public class UserService implements UserDetailsService {
                 .roles("USER")
                 .build();
     }
-}
+
+    @Transactional
+    public void saveProfilePicture(Long userId, String base64Image) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found."));
+
+        if (base64Image == null || base64Image.isEmpty()) {
+            throw new IllegalArgumentException("Image is required.");
+        }
+
+        user.setProfilePictureBase64(base64Image);
+        userRepository.save(user);
+    }}

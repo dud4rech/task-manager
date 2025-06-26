@@ -13,7 +13,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,15 +41,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
-            String token = jwtService.generateToken(userDetails);
+            var user = userService.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found."));
+
+            String token = jwtService.generateToken(user);
 
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (BadCredentialsException | UsernameNotFoundException e) {

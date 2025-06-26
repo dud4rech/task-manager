@@ -4,6 +4,7 @@ import com.project.task_manager.dto.ShareTaskRequest;
 import com.project.task_manager.model.Task;
 import com.project.task_manager.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,19 +28,19 @@ public class TaskController {
     private final TaskService taskService;
 
     @GetMapping
-    public ResponseEntity<List<Task>> listAllAccessibleTasks(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> listAllAccessibleTasks(@AuthenticationPrincipal UserDetails userDetails) {
         List<Task> tasks = taskService.findAllAccessibleTasks(userDetails.getUsername());
         return ResponseEntity.ok(tasks);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<String> listAccessibleTaskById(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
-        try {
-            taskService.findAccessibleTaskById(id, userDetails.getUsername());
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(403).body("User not authorized.");
+    public ResponseEntity<?> listAccessibleTaskById(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
+        Optional<Task> task = taskService.findAccessibleTaskById(id, userDetails.getUsername());
+
+        if (task.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User not authorized.");
         }
+        return ResponseEntity.ok(task);
     }
 
     @PostMapping
@@ -54,9 +56,9 @@ public class TaskController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
-        taskService.delete(userDetails.getUsername(), id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> softDeleteTask(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails) {
+        taskService.softDelete(userDetails.getUsername(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{taskId}/share")

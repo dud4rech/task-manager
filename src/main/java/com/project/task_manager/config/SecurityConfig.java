@@ -34,7 +34,7 @@ public class SecurityConfig {
                     .requestMatchers("/auth/signup", "/auth/login").permitAll()
                     .anyRequest().authenticated()
             )
-                .addFilterBefore(new JwtFilter(jwtService, applicationContext), UsernamePasswordAuthenticationFilter.class)            .logout(LogoutConfigurer::permitAll);
+            .addFilterBefore(new JwtFilter(jwtService, applicationContext, userRepository), UsernamePasswordAuthenticationFilter.class)            .logout(LogoutConfigurer::permitAll);
 
         return http.build();
     }

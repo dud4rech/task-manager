@@ -37,6 +37,12 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String passwordHash;
 
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(columnDefinition = "TEXT")
+    private String profilePictureBase64;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();

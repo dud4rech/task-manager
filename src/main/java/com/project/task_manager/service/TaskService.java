@@ -58,6 +58,7 @@ public class TaskService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found."));
 
         task.setOwner(user);
+        task.setIsActive(true);
         return taskRepository.save(task);
     }
 
@@ -72,11 +73,12 @@ public class TaskService {
         existingTask.setTitle(task.getTitle());
         existingTask.setDescription(task.getDescription());
         existingTask.setStatus(task.getStatus());
+        existingTask.setDeadline(task.getDeadline());
 
         return taskRepository.save(existingTask);
     }
 
-    public void delete(String username, Long taskId) {
+    public void softDelete(String username, Long taskId) {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found."));
 
@@ -84,7 +86,8 @@ public class TaskService {
             throw new SecurityException("Not authorized to delete this task.");
         }
 
-        taskRepository.delete(existingTask);
+        existingTask.setIsActive(false);
+        taskRepository.save(existingTask);
     }
 
     public void shareTaskWithUsers(Long taskId, List<String> emails, String ownerUsername) {
