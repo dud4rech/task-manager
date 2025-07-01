@@ -70,7 +70,7 @@ public class BaseApiCaller {
      */
     public void login(String username, String password, final ApiCallback<String> callback) {
         Map<String, String> bodyMap = new HashMap<>();
-        bodyMap.put("username", username);
+        bodyMap.put("email", username);
         bodyMap.put("password", password);
         String jsonBody = gson.toJson(bodyMap);
 
@@ -171,7 +171,7 @@ public class BaseApiCaller {
     // --- Métodos de Tarefas (Tasks) ---
 
     /**
-     * Lista todas as tarefas.
+     * Lista todas as tarefas. O usuário será pego pelo backend com base na autenticação
      * Endpoint: GET /tasks
      */
     public void listTasks(String token, final ApiCallback<String> callback) {

@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/navigation_tasks"
-        android:name="com.example.task_manager_mobile.ui.home.HomeFragment"
+        android:name="com.example.task_manager_mobile.ui.fragments.TasksFragment"
         android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_tasks" />
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.example.task_manager_mobile.ui.dashboard.DashboardFragment"
+        android:name="com.example.task_manager_mobile.ui.fragments.ProfileFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_profile" />
     </navigation>

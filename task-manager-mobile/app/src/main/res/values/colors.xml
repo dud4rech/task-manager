@@ -7,4 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="status_done">#4CAF50</color>
+    <color name="status_in_progress">#2196F3</color>
+    <color name="status_todo">#FF9800</color>
 </resources>

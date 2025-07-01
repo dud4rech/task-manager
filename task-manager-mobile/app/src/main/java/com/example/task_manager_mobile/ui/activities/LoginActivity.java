@@ -1,4 +1,4 @@
-package com.example.task_manager_mobile;
+package com.example.task_manager_mobile.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,6 +34,10 @@ public class LoginActivity extends AppCompatActivity {
 
         this.baseApiCaller = new BaseApiCaller();
         this.sessionManager = new SessionManager(getApplicationContext());
+
+        if (!TextUtils.isEmpty(sessionManager.getAuthToken())) {
+            this.navigateToMainActivity();
+        }
 
         this.setupClickListeners();
     }
@@ -80,10 +84,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         Toast.makeText(LoginActivity.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
 
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-
+                        navigateToMainActivity();
                     } catch (JsonSyntaxException e) {
                         Toast.makeText(LoginActivity.this, "Erro ao processar a resposta do servidor.", Toast.LENGTH_LONG).show();
                     }
@@ -97,5 +98,12 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void navigateToMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }

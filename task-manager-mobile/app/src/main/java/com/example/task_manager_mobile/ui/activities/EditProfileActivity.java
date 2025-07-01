@@ -1,0 +1,121 @@
+package com.example.task_manager_mobile.ui.activities;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.widget.Toast;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.task_manager_mobile.databinding.ActivityEditProfileBinding;
+import com.example.task_manager_mobile.dto.User;
+import com.example.task_manager_mobile.infrastructure.SessionManager;
+import com.example.task_manager_mobile.requests.BaseApiCaller;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+public class EditProfileActivity extends AppCompatActivity {
+
+    public static final String EXTRA_USER = "user_extra";
+    private ActivityEditProfileBinding binding;
+    private User currentUser;
+    private BaseApiCaller baseApiCaller;
+    private SessionManager sessionManager;
+    private String newProfilePicBase64 = null;
+
+    private final ActivityResultLauncher<Intent> imagePickerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Uri imageUri = result.getData().getData();
+                    if (imageUri != null) {
+                        binding.editProfileImage.setImageURI(imageUri);
+                        try {
+                            newProfilePicBase64 = uriToBase64(imageUri);
+                        } catch (IOException e) {
+                            Toast.makeText(this, "Falha ao processar a imagem", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityEditProfileBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        currentUser = (User) getIntent().getSerializableExtra(EXTRA_USER);
+        if (currentUser == null) {
+            Toast.makeText(this, "Erro ao carregar dados do usuário.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        baseApiCaller = new BaseApiCaller();
+        sessionManager = new SessionManager(this);
+
+        populateInitialData();
+        setupClickListeners();
+    }
+
+    private void populateInitialData() {
+        binding.etEditName.setText(currentUser.getUsername());
+        binding.etEditEmail.setText(currentUser.getEmail());
+    }
+
+    private void setupClickListeners() {
+        binding.editProfileImage.setOnClickListener(v -> openGallery());
+        binding.btnCancel.setOnClickListener(v -> finish()); // Apenas fecha a activity
+        binding.btnSave.setOnClickListener(v -> saveChanges());
+    }
+
+    private void openGallery() {
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        imagePickerLauncher.launch(intent);
+    }
+
+    private void saveChanges() {
+        String newName = binding.etEditName.getText().toString().trim();
+        String newEmail = binding.etEditEmail.getText().toString().trim();
+        String token = sessionManager.getAuthToken();
+        String userId = String.valueOf(currentUser.getId());
+
+        if (newName.isEmpty() || newEmail.isEmpty()) {
+            Toast.makeText(this, "Os campos não podem estar vazios", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String imageToSend = newProfilePicBase64 != null ? newProfilePicBase64 : currentUser.getProfilePictureBase64();
+
+         baseApiCaller.updateUser(userId, newName, newEmail, imageToSend, token, new BaseApiCaller.ApiCallback<String>() {
+             @Override
+             public void onSuccess(String updatedUser) {
+                 runOnUiThread(() -> {
+                     Toast.makeText(EditProfileActivity.this, "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
+                     setResult(Activity.RESULT_OK);
+                     finish();
+                 });
+             }
+
+             @Override
+             public void onError(String message) {
+                 runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show());
+             }
+         });
+    }
+
+    private String uriToBase64(Uri uri) throws IOException {
+        Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+}

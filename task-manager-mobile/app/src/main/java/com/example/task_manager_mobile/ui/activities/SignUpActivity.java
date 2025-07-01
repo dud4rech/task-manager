@@ -1,9 +1,8 @@
-package com.example.task_manager_mobile;
+package com.example.task_manager_mobile.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -103,10 +102,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                         Toast.makeText(SignUpActivity.this, "Login realizado com sucesso!", Toast.LENGTH_SHORT).show();
 
-                        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-
+                        navigateToMainActivity();
                     } catch (JsonSyntaxException e) {
                         Toast.makeText(SignUpActivity.this, "Erro ao processar a resposta do servidor.", Toast.LENGTH_LONG).show();
                     }
@@ -120,5 +116,12 @@ public class SignUpActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private void navigateToMainActivity() {
+        Intent intent = new Intent(SignUpActivity.this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 }
