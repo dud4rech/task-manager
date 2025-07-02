@@ -51,7 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void handleRegistration() {
         String name = binding.etName.getText().toString().trim();
-        String email = binding.etEmail.getText().toString().trim();
+        String username = binding.etUsername.getText().toString().trim();
         String password = binding.etPassword.getText().toString().trim();
 
         if (TextUtils.isEmpty(name)) {
@@ -61,15 +61,15 @@ public class SignUpActivity extends AppCompatActivity {
         }
 
         // Não permite espaços nem caracteres especiais
-        if (!name.matches("^[a-zA-Z0-9]+$")) {
-            binding.etName.setError("O nome de usuário deve conter apenas letras e números, sem espaços.");
-            binding.etName.requestFocus();
+        if (!username.matches("^[a-zA-Z0-9]+$")) {
+            binding.etUsername.setError("O nome de usuário deve conter apenas letras e números, sem espaços.");
+            binding.etUsername.requestFocus();
             return;
         }
 
-        if (TextUtils.isEmpty(email)) {
-            binding.etEmail.setError("O e-mail é obrigatório");
-            binding.etEmail.requestFocus();
+        if (TextUtils.isEmpty(name)) {
+            binding.etName.setError("O nome é obrigatório");
+            binding.etName.requestFocus();
             return;
         }
 
@@ -90,7 +90,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Iniciando cadastro...", Toast.LENGTH_LONG).show();
 
-        baseApiCaller.signUp(name, password, email, new BaseApiCaller.ApiCallback<String>() {
+        baseApiCaller.signUp(username, password, name, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 runOnUiThread(() -> {

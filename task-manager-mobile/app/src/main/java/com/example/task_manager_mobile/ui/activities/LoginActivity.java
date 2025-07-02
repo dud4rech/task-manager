@@ -54,12 +54,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleLoginAttempt() {
-        String email = binding.etEmail.getText().toString().trim();
+        String username = binding.etUsername.getText().toString().trim();
         String password = binding.etPassword.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email)) {
-            binding.etEmail.setError("O e-mail é obrigatório");
-            binding.etEmail.requestFocus();
+        if (TextUtils.isEmpty(username)) {
+            binding.etUsername.setError("O e-mail é obrigatório");
+            binding.etUsername.requestFocus();
             return;
         }
 
@@ -71,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Iniciando login...", Toast.LENGTH_LONG).show();
 
-        baseApiCaller.login(email, password, new BaseApiCaller.ApiCallback<String>() {
+        baseApiCaller.login(username, password, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 // Roda na thread principal para poder atualizar a UI

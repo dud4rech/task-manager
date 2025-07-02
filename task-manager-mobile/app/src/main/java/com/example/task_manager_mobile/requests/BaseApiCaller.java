@@ -50,7 +50,7 @@ public class BaseApiCaller {
         Map<String, String> bodyMap = new HashMap<>();
         bodyMap.put("username", username);
         bodyMap.put("password", password);
-        bodyMap.put("email", email);
+        bodyMap.put("name", email);
         String jsonBody = gson.toJson(bodyMap);
 
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
@@ -70,7 +70,7 @@ public class BaseApiCaller {
      */
     public void login(String username, String password, final ApiCallback<String> callback) {
         Map<String, String> bodyMap = new HashMap<>();
-        bodyMap.put("email", username);
+        bodyMap.put("username", username);
         bodyMap.put("password", password);
         String jsonBody = gson.toJson(bodyMap);
 
@@ -117,11 +117,11 @@ public class BaseApiCaller {
      * Atualiza um usuário existente.
      * Endpoint: PUT /users/{id}
      */
-    public void updateUser(String userId, String username, String password, String email, String token, final ApiCallback<String> callback) {
+    public void updateUser(String userId, String username, String name, String profilePicture, String token, final ApiCallback<String> callback) {
         Map<String, String> bodyMap = new HashMap<>();
         bodyMap.put("username", username);
-        bodyMap.put("password", password);
-        bodyMap.put("email", email);
+        bodyMap.put("name", name);
+        bodyMap.put("profilePicture", profilePicture);
         String jsonBody = gson.toJson(bodyMap);
 
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);

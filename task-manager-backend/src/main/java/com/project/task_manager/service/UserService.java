@@ -61,7 +61,6 @@ public class UserService implements UserDetailsService {
 
         existingUser.setName(newUser.getName());
         existingUser.setUsername(newUser.getUsername());
-        existingUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
 
         if (newUser.getProfilePicture() != null) {
             existingUser.setProfilePicture(newUser.getProfilePicture());

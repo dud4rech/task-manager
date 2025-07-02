@@ -34,7 +34,18 @@ public class AuthController {
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest request) {
         try {
             userService.register(request);
-            return ResponseEntity.ok("Conta criada com sucesso.");
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            var user = userService.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
+
+            String token = jwtService.generateToken(user);
+
+            return ResponseEntity.ok(new AuthResponse(token));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -2,7 +2,10 @@ package com.example.task_manager_mobile.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.auth0.android.jwt.JWT;
+import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.ui.activities.EditProfileActivity;
 import com.example.task_manager_mobile.ui.activities.LoginActivity;
 import com.example.task_manager_mobile.databinding.FragmentProfileBinding;
@@ -107,10 +111,24 @@ public class ProfileFragment extends Fragment {
     }
 
     private void populateUI() {
+        binding.tvName.setText(currentUser.getName());
         binding.tvUserName.setText(currentUser.getUsername());
-        binding.tvUserEmail.setText(currentUser.getEmail());
-        binding.tvInfoFullName.setText(currentUser.getUsername());
-        binding.tvInfoEmail.setText(currentUser.getEmail());
+        binding.tvInfoUserName.setText(currentUser.getUsername());
+        binding.tvInfoFullName.setText(currentUser.getName());
+
+        String base64Image = currentUser.getProfilePicture();
+
+        if (base64Image != null && !base64Image.isEmpty()) {
+            try {
+                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap decodedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                binding.profileImage.setImageBitmap(decodedBitmap);
+            } catch (IllegalArgumentException e) {
+                binding.profileImage.setImageResource(R.drawable.baseline_person_24);
+            }
+        } else {
+            binding.profileImage.setImageResource(R.drawable.baseline_person_24);
+        }
     }
 
     private void logout() {

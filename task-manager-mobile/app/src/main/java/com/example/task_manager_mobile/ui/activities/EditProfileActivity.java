@@ -3,6 +3,7 @@ package com.example.task_manager_mobile.ui.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -12,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.databinding.ActivityEditProfileBinding;
 import com.example.task_manager_mobile.dto.User;
 import com.example.task_manager_mobile.infrastructure.SessionManager;
@@ -66,8 +68,22 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void populateInitialData() {
-        binding.etEditName.setText(currentUser.getUsername());
-        binding.etEditEmail.setText(currentUser.getEmail());
+        binding.etEditName.setText(currentUser.getName());
+        binding.etEditUsername.setText(currentUser.getUsername());
+
+        String base64Image = currentUser.getProfilePicture();
+
+        if (base64Image != null && !base64Image.isEmpty()) {
+            try {
+                byte[] decodedString = Base64.decode(base64Image, Base64.DEFAULT);
+                Bitmap decodedBitmap = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                binding.editProfileImage.setImageBitmap(decodedBitmap);
+            } catch (IllegalArgumentException e) {
+                binding.editProfileImage.setImageResource(R.drawable.baseline_person_24);
+            }
+        } else {
+            binding.editProfileImage.setImageResource(R.drawable.baseline_person_24);
+        }
     }
 
     private void setupClickListeners() {
@@ -83,18 +99,18 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void saveChanges() {
         String newName = binding.etEditName.getText().toString().trim();
-        String newEmail = binding.etEditEmail.getText().toString().trim();
+        String newUsername = binding.etEditUsername.getText().toString().trim();
         String token = sessionManager.getAuthToken();
         String userId = String.valueOf(currentUser.getId());
 
-        if (newName.isEmpty() || newEmail.isEmpty()) {
+        if (newName.isEmpty() || newUsername.isEmpty()) {
             Toast.makeText(this, "Os campos não podem estar vazios", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String imageToSend = newProfilePicBase64 != null ? newProfilePicBase64 : currentUser.getProfilePictureBase64();
+        String imageToSend = newProfilePicBase64 != null ? newProfilePicBase64 : currentUser.getProfilePicture();
 
-         baseApiCaller.updateUser(userId, newName, newEmail, imageToSend, token, new BaseApiCaller.ApiCallback<String>() {
+         baseApiCaller.updateUser(userId, newUsername, newName, imageToSend, token, new BaseApiCaller.ApiCallback<String>() {
              @Override
              public void onSuccess(String updatedUser) {
                  runOnUiThread(() -> {
