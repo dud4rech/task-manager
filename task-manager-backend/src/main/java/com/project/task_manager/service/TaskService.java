@@ -24,18 +24,18 @@ public class TaskService {
     private final UserRepository userRepository;
     private final TaskSharedRepository taskSharedRepository;
 
-    public Optional<Task> findAccessibleTaskById(Long taskId, String email) {
+    public Optional<Task> findAccessibleTaskById(Long taskId, String username) {
         Optional<Task> taskOptional = taskRepository.findById(taskId);
 
         if (taskOptional.isEmpty()) return Optional.empty();
 
         Task task = taskOptional.get();
 
-        if (task.getOwner().getEmail().equals(email)) {
+        if (task.getOwner().getUsername().equals(username)) {
             return Optional.of(task);
         }
 
-        boolean isShared = taskSharedRepository.existsByTaskAndSharedWithEmail(task, email);
+        boolean isShared = taskSharedRepository.existsByTaskAndSharedWithUsername(task, username);
         if (isShared) {
             return Optional.of(task);
         }
@@ -43,9 +43,9 @@ public class TaskService {
         return Optional.empty();
     }
 
-    public List<Task> findAllAccessibleTasks(String email) {
-        List<Task> ownedTasks = taskRepository.findByOwnerEmail(email);
-        List<Task> sharedTasks = taskSharedRepository.findSharedTasksByEmail(email);
+    public List<Task> findAllAccessibleTasks(String username) {
+        List<Task> ownedTasks = taskRepository.findByOwnerUsername(username);
+        List<Task> sharedTasks = taskSharedRepository.findSharedTasksByUsername(username);
 
         Set<Task> allTasks = new HashSet<>(ownedTasks);
         allTasks.addAll(sharedTasks);
@@ -53,8 +53,8 @@ public class TaskService {
         return new ArrayList<>(allTasks);
     }
 
-    public Task save(String email, Task task) {
-        User user = userRepository.findByEmail(email)
+    public Task save(String username, Task task) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
 
         task.setOwner(user);
@@ -62,11 +62,11 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public Task update(String email, Long taskId, Task task) {
+    public Task update(String username, Long taskId, Task task) {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
 
-        if (!existingTask.getOwner().getEmail().equals(email)) {
+        if (!existingTask.getOwner().getUsername().equals(username)) {
             throw new SecurityException("Você não está autorizado a atualizar esta tarefa.");
         }
 
@@ -78,11 +78,11 @@ public class TaskService {
         return taskRepository.save(existingTask);
     }
 
-    public void softDelete(String email, Long taskId) {
+    public void softDelete(String username, Long taskId) {
         Task existingTask = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
 
-        if (!existingTask.getOwner().getEmail().equals(email)) {
+        if (!existingTask.getOwner().getUsername().equals(username)) {
             throw new SecurityException("Você não está autorizado a deletar esta tarefa.");
         }
 
@@ -90,8 +90,8 @@ public class TaskService {
         taskRepository.save(existingTask);
     }
 
-    public void shareTaskWithUsers(Long taskId, List<String> emails, String ownerEmail) {
-        User owner = userRepository.findByEmail(ownerEmail)
+    public void shareTaskWithUsers(Long taskId, List<String> usernameList, String ownerUsername) {
+        User owner = userRepository.findByUsername(ownerUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário responsável não encontrado."));
 
         Task task = taskRepository.findById(taskId)
@@ -101,13 +101,13 @@ public class TaskService {
             throw new SecurityException("Você não está autorizado a compartilhar esta tarefa.");
         }
 
-        for (String email : emails) {
-            if (email.equalsIgnoreCase(ownerEmail)) {
+        for (String username : usernameList) {
+            if (username.equalsIgnoreCase(ownerUsername)) {
                 continue;
             }
 
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuário com email " + email + " não encontrado."));
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário com username " + username + " não encontrado."));
 
             boolean alreadyShared = taskSharedRepository.existsByTaskAndSharedWith(task, user);
             if (!alreadyShared) {

@@ -8,14 +8,14 @@ import lombok.Data;
 @Data
 public class SignUpRequest {
 
-    @NotNull(message = "Nome de usuário não pode ser nulo.")
-    @NotBlank(message = "Informe um nome de usuário.")
-    private String username;
+    @NotNull(message = "Nome não pode ser nulo.")
+    @NotBlank(message = "Informe um nome.")
+    private String name;
 
-    @NotNull(message = "E-mail não pode ser nulo.")
-    @NotBlank(message = "Informe um e-mail.")
-    @Email(message = "E-mail inválido.")
-    private String email;
+    @NotNull(message = "Username não pode ser nulo.")
+    @NotBlank(message = "Informe um username.")
+    @Email(message = "Username inválido.")
+    private String username;
 
     @NotNull(message = "Senha não pode ser nula.")
     @NotBlank(message = "Informe uma senha.")

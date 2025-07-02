@@ -12,9 +12,8 @@ import java.util.List;
 public interface TaskSharedRepository extends JpaRepository<TaskShared, Long> {
     boolean existsByTaskAndSharedWith(Task task, User user);
 
-    boolean existsByTaskAndSharedWithEmail(Task task, String email);
+    boolean existsByTaskAndSharedWithUsername(Task task, String username);
 
-    @Query("SELECT ts.task FROM TaskShared ts WHERE ts.sharedWith.email = :email")
-    List<Task> findSharedTasksByEmail(@Param("email") String email);
+    @Query("SELECT ts.task FROM TaskShared ts WHERE ts.sharedWith.username = :username")
+    List<Task> findSharedTasksByUsername(@Param("username") String username);
 }
-

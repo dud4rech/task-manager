@@ -26,8 +26,8 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public List<User> findAll() {
@@ -36,13 +36,13 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void register(@Valid SignUpRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("E-mail já está em uso.");
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username já está em uso.");
         }
 
         User newUser = User.builder()
+                .name(request.getName())
                 .username(request.getUsername())
-                .email(request.getEmail())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
                 .build();
@@ -51,16 +51,16 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void update(String email, Long id, User newUser) {
+    public void update(String username, Long id, User newUser) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
-        if (!existingUser.getEmail().equals(email)) {
+        if (!existingUser.getUsername().equals(username)) {
             throw new SecurityException("Você não está autorizado a atualizar este usuário.");
         }
 
+        existingUser.setName(newUser.getName());
         existingUser.setUsername(newUser.getUsername());
-        existingUser.setEmail(newUser.getEmail());
         existingUser.setPasswordHash(passwordEncoder.encode(newUser.getPassword()));
 
         if (newUser.getProfilePicture() != null) {
@@ -71,11 +71,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void softDelete(String email, Long id) {
+    public void softDelete(String username, Long id) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado."));
 
-        if (!existingUser.getEmail().equals(email)) {
+        if (!existingUser.getUsername().equals(username)) {
             throw new SecurityException("Você não está autorizado a deletar este usuário.");
         }
 
@@ -84,12 +84,12 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
+                .withUsername(user.getUsername())
                 .password(user.getPasswordHash())
                 .roles("USER")
                 .build();

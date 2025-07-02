@@ -9,6 +9,4 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByOwnerId(Long ownerId);
 
     List<Task> findByOwnerUsername(String username);
-
-    List<Task> findByOwnerEmail(String email);
 }

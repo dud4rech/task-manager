@@ -44,11 +44,11 @@ public class AuthController {
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            var user = userService.findByEmail(request.getEmail())
+            var user = userService.findByUsername(request.getUsername())
                     .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado."));
 
             String token = jwtService.generateToken(user);
@@ -57,7 +57,7 @@ public class AuthController {
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             return ResponseEntity
                     .status(401)
-                    .body(Map.of("message", "E-mail ou senha inválidos."));
+                    .body(Map.of("message", "Username ou senha inválidos."));
         } catch (Exception e) {
             return ResponseEntity
                     .status(500)

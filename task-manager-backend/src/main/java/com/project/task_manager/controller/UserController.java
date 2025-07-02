@@ -53,7 +53,7 @@ public class UserController {
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body("Você não está autorizado a atualizar este usuário.");
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body("E-mail já existe ou usuário não encontrado.");
+            return ResponseEntity.badRequest().body("Username já existe ou usuário não encontrado.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -67,7 +67,7 @@ public class UserController {
         } catch (SecurityException e) {
             return ResponseEntity.status(403).body("Você não está autorizado a deletar este usuário.");
         } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.badRequest().body("E-mail já existe ou usuário não encontrado.");
+            return ResponseEntity.badRequest().body("Username já existe ou usuário não encontrado.");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
