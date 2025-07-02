@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String userId;
 
         try {
-            userId = jwtService.extractUserId(token); // extração do claim "userId"
+            userId = jwtService.extractUserId(token);
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
