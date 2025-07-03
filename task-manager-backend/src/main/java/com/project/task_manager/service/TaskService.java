@@ -43,9 +43,13 @@ public class TaskService {
         return Optional.empty();
     }
 
+    public List<User> findUsersByTaskId(Long taskId) {
+        return taskSharedRepository.findUsersByTaskId(taskId);
+    }
+
     public List<Task> findAllAccessibleTasks(String username) {
-        List<Task> ownedTasks = taskRepository.findByOwnerUsername(username);
-        List<Task> sharedTasks = taskSharedRepository.findSharedTasksByUsername(username);
+        List<Task> ownedTasks = taskRepository.findActiveTasksByOwnerUsername(username);
+        List<Task> sharedTasks = taskSharedRepository.findActiveSharedTasksByUsername(username);
 
         Set<Task> allTasks = new HashSet<>(ownedTasks);
         allTasks.addAll(sharedTasks);

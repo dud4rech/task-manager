@@ -2,6 +2,7 @@ package com.project.task_manager.controller;
 
 import com.project.task_manager.dto.ShareTaskRequest;
 import com.project.task_manager.model.Task;
+import com.project.task_manager.model.User;
 import com.project.task_manager.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,12 @@ public class TaskController {
         }
     }
 
+    @GetMapping("/{taskId}/shared-users")
+    public ResponseEntity<?> getUsersByTaskId(@PathVariable Long taskId) {
+        List<User> users = taskService.findUsersByTaskId(taskId);
+        return ResponseEntity.ok(users);
+    }
+
     @PostMapping
     public ResponseEntity<Task> createTask(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Task task) {
         Task created = taskService.save(userDetails.getUsername(), task);
@@ -83,7 +90,7 @@ public class TaskController {
             @AuthenticationPrincipal UserDetails userDetails
     ) {
         try {
-            taskService.shareTaskWithUsers(taskId, request.getEmails(), userDetails.getUsername());
+            taskService.shareTaskWithUsers(taskId, request.getUsernames(), userDetails.getUsername());
             return ResponseEntity.ok("Tarefa compartilhada com sucesso.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

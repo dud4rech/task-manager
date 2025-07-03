@@ -1,6 +1,8 @@
 package com.example.task_manager_mobile.requests;
 import androidx.annotation.NonNull;
 
+import com.example.task_manager_mobile.dto.ShareTaskRequest;
+import com.example.task_manager_mobile.dto.Task;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -23,7 +25,7 @@ import okhttp3.ResponseBody;
  */
 public class BaseApiCaller {
 
-    public static final String BASE_URL = "http://192.168.0.26:8080/";
+    public static final String BASE_URL = "http://192.168.0.20:8080/";
 
     private static final OkHttpClient client = new OkHttpClient();
     private static final Gson gson = new Gson();
@@ -188,14 +190,9 @@ public class BaseApiCaller {
      * Cria uma nova tarefa.
      * Endpoint: POST /tasks
      */
-    public void createTask(String title, String description, String status, String deadline, String token, final ApiCallback<String> callback) {
-        Map<String, String> bodyMap = new HashMap<>();
-        bodyMap.put("title", title);
-        bodyMap.put("description", description);
-        bodyMap.put("status", status); // Ex: "TO_DO"
-        bodyMap.put("deadline", deadline); // Ex: "2026-06-29"
+    public void createTask(Task newTask, String token, final ApiCallback<String> callback) {
+        String jsonBody = gson.toJson(newTask);
 
-        String jsonBody = gson.toJson(bodyMap);
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
 
         Request request = new Request.Builder()
@@ -207,18 +204,8 @@ public class BaseApiCaller {
         executeCall(request, callback);
     }
 
-    /**
-     * Atualiza uma tarefa existente.
-     * Endpoint: PUT /tasks/{id}
-     */
-    public void updateTask(String taskId, String title, String description, String status, String deadline, String token, final ApiCallback<String> callback) {
-        Map<String, String> bodyMap = new HashMap<>();
-        bodyMap.put("title", title);
-        bodyMap.put("description", description);
-        bodyMap.put("status", status);
-        bodyMap.put("deadline", deadline);
-
-        String jsonBody = gson.toJson(bodyMap);
+    public void updateTask(String taskId, Task taskToUpdate, String token, final ApiCallback<String> callback) {
+        String jsonBody = gson.toJson(taskToUpdate);
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
 
         Request request = new Request.Builder()
@@ -248,12 +235,11 @@ public class BaseApiCaller {
      * Compartilha uma tarefa com outros usuários.
      * Endpoint: POST /tasks/{id}/share
      */
-    public void shareTask(String taskId, List<String> emails, String token, final ApiCallback<String> callback) {
-        Map<String, List<String>> bodyMap = new HashMap<>();
-        bodyMap.put("emails", emails);
-        String jsonBody = gson.toJson(bodyMap);
-
+    public void shareTask(String taskId, List<String> usernames, String token, final ApiCallback<String> callback) {
+        ShareTaskRequest shareRequest = new ShareTaskRequest(usernames);
+        String jsonBody = gson.toJson(shareRequest);
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
+
         Request request = new Request.Builder()
                 .url(BASE_URL + "tasks/" + taskId + "/share")
                 .addHeader("Authorization", "Bearer " + token)
@@ -263,6 +249,34 @@ public class BaseApiCaller {
         executeCall(request, callback);
     }
 
+    public void listAllUsers(String token, final ApiCallback<String> callback) {
+        Request request = new Request.Builder()
+                .url(BASE_URL + "users")
+                .addHeader("Authorization", "Bearer " + token)
+                .get()
+                .build();
+        executeCall(request, callback);
+    }
+
+    public void getSharedUsersForTask(String taskId, String token, final ApiCallback<String> callback) {
+        Request request = new Request.Builder()
+                .url(BASE_URL + "tasks/" + taskId + "/shared-users")
+                .addHeader("Authorization", "Bearer " + token)
+                .get()
+                .build();
+        executeCall(request, callback);
+    }
+
+
+    public void getTaskById(String taskId, String token, final ApiCallback<String> callback) {
+        Request request = new Request.Builder()
+                .url(BASE_URL + "tasks/" + taskId)
+                .addHeader("Authorization", "Bearer " + token)
+                .get()
+                .build();
+
+        executeCall(request, callback);
+    }
 
     // --- Executor Genérico de Chamadas ---
 

@@ -1,6 +1,7 @@
 package com.example.task_manager_mobile.ui.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.dto.Task;
+import com.example.task_manager_mobile.enums.TaskStatus;
+import com.example.task_manager_mobile.ui.activities.TaskDetailActivity;
+import com.example.task_manager_mobile.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,21 +39,27 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Task task = taskList.get(position);
         holder.tvTitle.setText(task.getTitle());
         holder.tvDescription.setText(task.getDescription());
-        holder.tvDueDate.setText("Due: " + task.getDeadline());
-        holder.tvStatus.setText(task.getStatus().name().replace("_", " "));
+        holder.tvDueDate.setText("Data: " + task.getDeadline());
+        holder.tvStatus.setText(Utils.generateStatusTextFromStatus(task.getStatus()));
 
-        // Lógica para mudar a cor do status
         switch (task.getStatus()) {
             case TO_DO:
-                holder.tvStatus.setBackgroundResource(R.color.status_todo);
+                holder.tvStatus.setBackgroundResource(R.drawable.badge_todo);
                 break;
             case IN_PROGRESS:
-                holder.tvStatus.setBackgroundResource(R.color.status_in_progress);
+                holder.tvStatus.setBackgroundResource(R.drawable.badge_in_progress);
                 break;
-            default: // DONE, COMPLETED
-                holder.tvStatus.setBackgroundResource(R.color.status_done);
+            case DONE:
+                holder.tvStatus.setBackgroundResource(R.drawable.badge_done);
                 break;
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            Context context = holder.itemView.getContext();
+            Intent intent = new Intent(context, TaskDetailActivity.class);
+            intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.getId());
+            context.startActivity(intent);
+        });
     }
 
     @Override

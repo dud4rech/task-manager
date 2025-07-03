@@ -61,7 +61,9 @@ public class ProfileFragment extends Fragment {
         binding.btnEditProfile.setOnClickListener(v -> {
             if (currentUser != null) {
                 Intent intent = new Intent(getContext(), EditProfileActivity.class);
-                intent.putExtra(EditProfileActivity.EXTRA_USER, currentUser);
+
+                intent.putExtra(EditProfileActivity.EXTRA_USER_ID, currentUser.getId());
+
                 editProfileLauncher.launch(intent);
             } else {
                 Toast.makeText(getContext(), "Aguarde os dados do usuário carregarem.", Toast.LENGTH_SHORT).show();

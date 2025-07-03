@@ -2,7 +2,9 @@ package com.example.task_manager_mobile.dto;
 
 import com.example.task_manager_mobile.enums.TaskStatus;
 
-public class Task {
+import java.io.Serializable;
+
+public class Task implements Serializable {
     private Long id;
     private String title;
     private String description;

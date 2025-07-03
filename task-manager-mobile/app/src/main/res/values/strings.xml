@@ -31,4 +31,15 @@
     <string name="to_do_chip">A fazer</string>
     <string name="in_progress_chip">Em andamento</string>
     <string name="completed_chip">Finalizada</string>
+    <string name="create_new_task_title">Crie sua Tarefa</string>
+    <string name="fill_details_create_task">Preencha abaixo os dados da tarefa</string>
+    <string name="title_task">Título</string>
+    <string name="due_date">Data</string>
+    <string name="status_task">Status</string>
+    <string name="to_do_stats">Pendente</string>
+    <string name="in_progress_stats">Em andamento</string>
+    <string name="done_status">Finalizada</string>
+    <string name="description_task">Descrição</string>
+    <string name="participants">Participantes</string>
+    <string name="add_participant_hint">Digite o nome de usuário..</string>
 </resources>

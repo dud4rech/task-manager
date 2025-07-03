@@ -6,5 +6,5 @@ import java.util.List;
 
 @Data
 public class ShareTaskRequest {
-    private List<String> emails;
+    private List<String> usernames;
 }

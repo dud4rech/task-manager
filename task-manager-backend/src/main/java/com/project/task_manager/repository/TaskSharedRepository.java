@@ -16,4 +16,11 @@ public interface TaskSharedRepository extends JpaRepository<TaskShared, Long> {
 
     @Query("SELECT ts.task FROM TaskShared ts WHERE ts.sharedWith.username = :username")
     List<Task> findSharedTasksByUsername(@Param("username") String username);
+
+    @Query("SELECT ts.task FROM TaskShared ts WHERE ts.sharedWith.username = :username AND ts.task.isActive = true")
+    List<Task> findActiveSharedTasksByUsername(@Param("username") String username);
+
+    @Query("SELECT ts.sharedWith FROM TaskShared ts WHERE ts.task.id = :taskId")
+    List<User> findUsersByTaskId(@Param("taskId") Long taskId);
+
 }
