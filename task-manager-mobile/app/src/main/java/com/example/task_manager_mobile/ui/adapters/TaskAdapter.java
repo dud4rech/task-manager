@@ -11,15 +11,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.dto.Task;
-import com.example.task_manager_mobile.enums.TaskStatus;
 import com.example.task_manager_mobile.ui.activities.TaskDetailActivity;
 import com.example.task_manager_mobile.utils.Utils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
 
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
     private List<Task> taskList = new ArrayList<>();
     private Context context;
 
@@ -39,7 +41,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         Task task = taskList.get(position);
         holder.tvTitle.setText(task.getTitle());
         holder.tvDescription.setText(task.getDescription());
-        holder.tvDueDate.setText("Data: " + task.getDeadline());
+        holder.tvDueDate.setText("Data: " + sdf.format(task.getDeadline()));
         holder.tvStatus.setText(Utils.generateStatusTextFromStatus(task.getStatus()));
 
         switch (task.getStatus()) {

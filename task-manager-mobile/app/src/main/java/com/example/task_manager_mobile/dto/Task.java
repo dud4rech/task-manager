@@ -3,13 +3,14 @@ package com.example.task_manager_mobile.dto;
 import com.example.task_manager_mobile.enums.TaskStatus;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class Task implements Serializable {
     private Long id;
     private String title;
     private String description;
     private TaskStatus status;
-    private String deadline;
+    private Date deadline;
 
     public Long getId() {
         return id;
@@ -43,11 +44,11 @@ public class Task implements Serializable {
         this.status = status;
     }
 
-    public String getDeadline() {
+    public Date getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(String deadline) {
+    public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
 }

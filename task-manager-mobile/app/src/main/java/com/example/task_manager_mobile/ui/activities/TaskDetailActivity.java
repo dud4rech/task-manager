@@ -18,8 +18,12 @@ import com.example.task_manager_mobile.requests.BaseApiCaller;
 import com.example.task_manager_mobile.utils.Utils;
 import com.google.gson.Gson;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class TaskDetailActivity extends AppCompatActivity {
 
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
     public static final String EXTRA_TASK_ID = "task_id_extra";
     private ActivityTaskDetailBinding binding;
     private BaseApiCaller baseApiCaller;
@@ -125,7 +129,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private void populateUI(Task task) {
         binding.tvDetailTitle.setText(task.getTitle());
         binding.tvDetailDescription.setText(task.getDescription());
-        binding.tvDetailDueDate.setText(task.getDeadline());
+        binding.tvDetailDueDate.setText(sdf.format(task.getDeadline()));
 
         if (task.getStatus() != null) {
             binding.tvDetailStatus.setText(Utils.generateStatusTextFromStatus(task.getStatus()));

@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -94,7 +95,7 @@ public class TaskService {
         taskRepository.save(existingTask);
     }
 
-    public void shareTaskWithUsers(Long taskId, List<String> usernameList, String ownerUsername) {
+    public void shareTaskWithUsers(Long taskId, List<String> newUsernameList, String ownerUsername) {
         User owner = userRepository.findByUsername(ownerUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário responsável não encontrado."));
 
@@ -105,21 +106,33 @@ public class TaskService {
             throw new SecurityException("Você não está autorizado a compartilhar esta tarefa.");
         }
 
-        for (String username : usernameList) {
-            if (username.equalsIgnoreCase(ownerUsername)) {
+        List<User> currentlySharedUsers = taskSharedRepository.findUsersByTaskId(taskId);
+        Set<String> currentSharedUsernames = currentlySharedUsers.stream()
+                .map(User::getUsername)
+                .collect(Collectors.toSet());
+
+        Set<String> newUsernames = new HashSet<>(newUsernameList);
+
+        List<User> usersToRemove = currentlySharedUsers.stream()
+                .filter(user -> !newUsernames.contains(user.getUsername()))
+                .toList();
+
+        if (!usersToRemove.isEmpty()) {
+            taskSharedRepository.deleteAllByTaskAndSharedWithIn(task, usersToRemove);
+        }
+
+        for (String usernameToAdd : newUsernames) {
+            if (currentSharedUsernames.contains(usernameToAdd) || usernameToAdd.equalsIgnoreCase(ownerUsername)) {
                 continue;
             }
 
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuário com username " + username + " não encontrado."));
+            User userToShareWith = userRepository.findByUsername(usernameToAdd)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário com username " + usernameToAdd + " não encontrado."));
 
-            boolean alreadyShared = taskSharedRepository.existsByTaskAndSharedWith(task, user);
-            if (!alreadyShared) {
-                TaskShared shared = new TaskShared();
-                shared.setTask(task);
-                shared.setSharedWith(user);
-                taskSharedRepository.save(shared);
-            }
+            TaskShared shared = new TaskShared();
+            shared.setTask(task);
+            shared.setSharedWith(userToShareWith);
+            taskSharedRepository.save(shared);
         }
     }
 }

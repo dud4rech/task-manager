@@ -27,8 +27,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 // package com.example.task_manager_mobile.ui.fragments;
@@ -86,13 +88,12 @@ public class TasksFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        taskAdapter = new TaskAdapter(getContext()); // Contexto removido pois não era usado
+        taskAdapter = new TaskAdapter(getContext());
         binding.recyclerViewTasks.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewTasks.setAdapter(taskAdapter);
     }
 
     private void setupFilters() {
-        // Filtro por texto (permanece igual)
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) { return false; }
@@ -104,7 +105,6 @@ public class TasksFragment extends Fragment {
             }
         });
 
-        // Filtro por status (ChipGroup)
         binding.chipGroupStatus.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chip_all) {
                 currentStatusFilter = null;
@@ -113,15 +113,12 @@ public class TasksFragment extends Fragment {
             } else if (checkedId == R.id.chip_in_progress) {
                 currentStatusFilter = TaskStatus.IN_PROGRESS;
             } else if (checkedId == R.id.chip_completed) {
-                // ▼▼▼ CORRIGIDO: Mapeando para o status DONE que existe no seu enum do app ▼▼▼
                 currentStatusFilter = TaskStatus.DONE;
             }
             applyFilters();
         });
     }
 
-    // O resto da classe (loadTasks, applyFilters, onDestroyView) permanece igual.
-    // ...
     private void loadTasks() {
         String token = sessionManager.getAuthToken();
         if (token == null) return;
@@ -132,10 +129,10 @@ public class TasksFragment extends Fragment {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(() -> {
                     try {
-                        Type listType = new TypeToken<ArrayList<Task>>() {
-                        }.getType();
+                        Type listType = new TypeToken<ArrayList<Task>>() {}.getType();
                         allTasks = new Gson().fromJson(jsonResult, listType);
-                        if (allTasks == null) { // Adiciona verificação de nulo após desserialização
+
+                        if (allTasks == null) {
                             allTasks = new ArrayList<>();
                         }
                         applyFilters();
@@ -154,17 +151,16 @@ public class TasksFragment extends Fragment {
     }
 
     private void applyFilters() {
-        // Cria uma cópia mutável para evitar modificar a lista original durante a filtragem
         List<Task> filteredList = new ArrayList<>(allTasks);
 
-        // 1. Filtrar por status
+        // Filtrar por status
         if (currentStatusFilter != null) {
             filteredList = filteredList.stream()
                     .filter(task -> task.getStatus() != null && task.getStatus().equals(currentStatusFilter))
                     .collect(Collectors.toList());
         }
 
-        // 2. Filtrar por texto
+        // Filtrar por texto
         if (!currentSearchQuery.isEmpty()) {
             filteredList = filteredList.stream()
                     .filter(task -> task.getTitle() != null && task.getTitle().toLowerCase().contains(currentSearchQuery.toLowerCase()))

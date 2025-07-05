@@ -1,5 +1,6 @@
 package com.project.task_manager.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.task_manager.enums.TaskStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +17,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "tasks")
@@ -40,8 +41,9 @@ public class Task {
     @Column(name = "status")
     private TaskStatus status = TaskStatus.TO_DO;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMM d, yyyy HH:mm:ss", locale = "en_US")
     @Column(name = "deadline")
-    private LocalDate deadline;
+    private Date deadline;
 
     @Column(name = "is_active")
     private Boolean isActive;

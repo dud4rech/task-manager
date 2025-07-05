@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.databinding.ActivityCreateTaskBinding;
+import com.example.task_manager_mobile.dto.CreateTaskRequest;
 import com.example.task_manager_mobile.dto.Task;
 import com.example.task_manager_mobile.dto.User;
 import com.example.task_manager_mobile.enums.TaskStatus;
@@ -31,13 +32,13 @@ import java.util.stream.Collectors;
 
 public class CreateTaskActivity extends AppCompatActivity {
 
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.US);
     private ActivityCreateTaskBinding binding;
     private BaseApiCaller baseApiCaller;
     private SessionManager sessionManager;
     private final Calendar calendar = Calendar.getInstance();
     private Task taskToEdit = null;
     public static final String EXTRA_TASK = "task_extra";
-
     private List<User> allUsersList = new ArrayList<>();
     private List<User> sharedUsersList = new ArrayList<>();
 
@@ -63,17 +64,12 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
     private void populateFieldsForEdit() {
-        setTitle("Edit Task"); // Opcional: muda o título da janela
+        binding.createTaskActivityTitle.setText("Editar tarefa");
         binding.etTaskTitle.setText(taskToEdit.getTitle());
         binding.etDescription.setText(taskToEdit.getDescription());
-        binding.etDueDate.setText(taskToEdit.getDeadline());
+        binding.etDueDate.setText(sdf.format(taskToEdit.getDeadline()));
 
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-            calendar.setTime(sdf.parse(taskToEdit.getDeadline()));
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+        calendar.setTime(taskToEdit.getDeadline());
 
         switch (taskToEdit.getStatus()) {
             case IN_PROGRESS:
@@ -124,7 +120,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                 });
             }
             @Override
-            public void onError(String message) { /* Trate o erro */ }
+            public void onError(String message) {}
         });
     }
 
@@ -182,7 +178,6 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
     private void updateDateInView() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         binding.etDueDate.setText(sdf.format(calendar.getTime()));
     }
 
@@ -221,15 +216,30 @@ public class CreateTaskActivity extends AppCompatActivity {
         taskData.setTitle(title);
         taskData.setDescription(description);
         taskData.setStatus(status);
-        taskData.setDeadline(deadline);
+
+        List<String> usernamesToShare = sharedUsersList.stream()
+                .map(User::getUsername)
+                .collect(Collectors.toList());
+
+        CreateTaskRequest createTaskRequest = new CreateTaskRequest();
+        createTaskRequest.setTask(taskData);
+        createTaskRequest.setUsernames(usernamesToShare);
+
+        try {
+            taskData.setDeadline(sdf.parse(deadline));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
         if (taskToEdit != null) {
             String taskId = String.valueOf(taskToEdit.getId());
-            baseApiCaller.updateTask(taskId, taskData, token, new BaseApiCaller.ApiCallback<String>() {
+            baseApiCaller.updateTask(taskId, createTaskRequest, token, new BaseApiCaller.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
                     runOnUiThread(() -> {
-                        shareTask(taskId);
+                        Toast.makeText(CreateTaskActivity.this, "Tarefa atualizada!", Toast.LENGTH_SHORT).show();
+                        setResult(Activity.RESULT_OK);
+                        finish();
                     });
                 }
                 @Override
@@ -238,7 +248,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                 }
             });
         } else {
-            baseApiCaller.createTask(taskData, token, new BaseApiCaller.ApiCallback<String>() {
+            baseApiCaller.createTask(createTaskRequest, token, new BaseApiCaller.ApiCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
                     runOnUiThread(() -> {
@@ -253,29 +263,5 @@ public class CreateTaskActivity extends AppCompatActivity {
                 }
             });
         }
-    }
-
-    private void shareTask(String taskId) {
-        List<String> usernamesToShare = sharedUsersList.stream()
-                .map(User::getUsername)
-                .collect(Collectors.toList());
-
-        baseApiCaller.shareTask(taskId, usernamesToShare, sessionManager.getAuthToken(), new BaseApiCaller.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-                runOnUiThread(() -> {
-                    Toast.makeText(CreateTaskActivity.this, "Tarefa atualizada e compartilhada!", Toast.LENGTH_SHORT).show();
-                    setResult(Activity.RESULT_OK);
-                    finish();
-                });
-            }
-
-            @Override
-            public void onError(String message) {
-                runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, "Tarefa atualizada, mas falha ao compartilhar: " + message, Toast.LENGTH_LONG).show());
-                setResult(Activity.RESULT_OK);
-                finish();
-            }
-        });
     }
 }

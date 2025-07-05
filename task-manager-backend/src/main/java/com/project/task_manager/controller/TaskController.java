@@ -1,5 +1,6 @@
 package com.project.task_manager.controller;
 
+import com.project.task_manager.dto.CreateTaskRequest;
 import com.project.task_manager.dto.ShareTaskRequest;
 import com.project.task_manager.model.Task;
 import com.project.task_manager.model.User;
@@ -54,15 +55,17 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@AuthenticationPrincipal UserDetails userDetails, @RequestBody Task task) {
-        Task created = taskService.save(userDetails.getUsername(), task);
+    public ResponseEntity<Task> createTask(@AuthenticationPrincipal UserDetails userDetails, @RequestBody CreateTaskRequest createTaskRequest) {
+        Task created = taskService.save(userDetails.getUsername(), createTaskRequest.getTask());
+        taskService.shareTaskWithUsers(created.getId(), createTaskRequest.getUsernames(), userDetails.getUsername());
         return ResponseEntity.ok(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id, @RequestBody Task task) {
+    public ResponseEntity<?> updateTask(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id, @RequestBody CreateTaskRequest createTaskRequest) {
         try {
-            Task updatedTask = taskService.update(userDetails.getUsername(), id, task);
+            Task updatedTask = taskService.update(userDetails.getUsername(), id, createTaskRequest.getTask());
+            taskService.shareTaskWithUsers(updatedTask.getId(), createTaskRequest.getUsernames(), userDetails.getUsername());
             return ResponseEntity.ok(updatedTask);
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Você não está autorizado a atualizar este usuário.");

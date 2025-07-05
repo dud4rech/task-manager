@@ -28,7 +28,7 @@
     <string name="tap_to_change_picture">Clique para editar a foto</string>
     <string name="edit_profile_title">Editar meu perfil</string>
     <string name="all_chip">Todas</string>
-    <string name="to_do_chip">A fazer</string>
+    <string name="to_do_chip">Pendente</string>
     <string name="in_progress_chip">Em andamento</string>
     <string name="completed_chip">Finalizada</string>
     <string name="create_new_task_title">Crie sua Tarefa</string>
@@ -41,5 +41,5 @@
     <string name="done_status">Finalizada</string>
     <string name="description_task">Descrição</string>
     <string name="participants">Participantes</string>
-    <string name="add_participant_hint">Digite o nome de usuário..</string>
+    <string name="add_participant_hint">Digite o nome de usuário</string>
 </resources>

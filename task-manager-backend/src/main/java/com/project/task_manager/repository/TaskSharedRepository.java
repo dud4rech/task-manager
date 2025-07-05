@@ -23,4 +23,5 @@ public interface TaskSharedRepository extends JpaRepository<TaskShared, Long> {
     @Query("SELECT ts.sharedWith FROM TaskShared ts WHERE ts.task.id = :taskId")
     List<User> findUsersByTaskId(@Param("taskId") Long taskId);
 
+    void deleteAllByTaskAndSharedWithIn(Task task, List<User> sharedWith);
 }

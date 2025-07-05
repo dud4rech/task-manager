@@ -1,6 +1,7 @@
 package com.example.task_manager_mobile.requests;
 import androidx.annotation.NonNull;
 
+import com.example.task_manager_mobile.dto.CreateTaskRequest;
 import com.example.task_manager_mobile.dto.ShareTaskRequest;
 import com.example.task_manager_mobile.dto.Task;
 import com.google.gson.Gson;
@@ -25,7 +26,7 @@ import okhttp3.ResponseBody;
  */
 public class BaseApiCaller {
 
-    public static final String BASE_URL = "http://192.168.0.20:8080/";
+    public static final String BASE_URL = "http://192.168.0.28:8080/";
 
     private static final OkHttpClient client = new OkHttpClient();
     private static final Gson gson = new Gson();
@@ -190,7 +191,7 @@ public class BaseApiCaller {
      * Cria uma nova tarefa.
      * Endpoint: POST /tasks
      */
-    public void createTask(Task newTask, String token, final ApiCallback<String> callback) {
+    public void createTask(CreateTaskRequest newTask, String token, final ApiCallback<String> callback) {
         String jsonBody = gson.toJson(newTask);
 
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
@@ -204,7 +205,7 @@ public class BaseApiCaller {
         executeCall(request, callback);
     }
 
-    public void updateTask(String taskId, Task taskToUpdate, String token, final ApiCallback<String> callback) {
+    public void updateTask(String taskId, CreateTaskRequest taskToUpdate, String token, final ApiCallback<String> callback) {
         String jsonBody = gson.toJson(taskToUpdate);
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
 
