@@ -25,7 +25,7 @@ Antes de começar, garanta que você tenha os seguintes softwares instalados em 
 ### 1. Configuração do Backend (Servidor)
 
 1.  **Crie o Banco de Dados:**
-    -   Acesse seu terminal do PostgreSQL (como o `psql`).
+    -   Acesse seu terminal do PostgreSQL.
     -   Crie a database com o nome `task-manager`. É importante usar aspas duplas se o nome contiver hifens.
     ```sql
     CREATE DATABASE "task-manager";
