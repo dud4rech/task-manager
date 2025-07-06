@@ -14,7 +14,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
-// Importe a classe de binding gerada para o seu novo layout
 import com.example.task_manager_mobile.databinding.ActivitySignUpBinding;
 import com.example.task_manager_mobile.dto.AuthResponse;
 import com.example.task_manager_mobile.infrastructure.SessionManager;
