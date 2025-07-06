@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 public class LoginRequest {
 
-    @NotBlank(message = "Informe seu username.")
+    @NotBlank(message = "Informe seu nome de usuário.")
     private String username;
 
     @NotBlank(message = "Informa sua senha.")

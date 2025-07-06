@@ -72,10 +72,13 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserData() {
+        showLoading(true);
+
         String token = sessionManager.getAuthToken();
         if (token == null || token.isEmpty()) {
             Toast.makeText(getContext(), "Sessão expirada. Faça login novamente.", Toast.LENGTH_SHORT).show();
             this.logout();
+            showLoading(false);
             return;
         }
 
@@ -84,6 +87,7 @@ public class ProfileFragment extends Fragment {
 
         if (userId == null) {
             Toast.makeText(getContext(), "Erro ao ler informações do usuário.", Toast.LENGTH_SHORT).show();
+            showLoading(false);
             return;
         }
 
@@ -93,6 +97,7 @@ public class ProfileFragment extends Fragment {
                 if (getActivity() == null) return;
 
                 getActivity().runOnUiThread(() -> {
+                    showLoading(false);
                     try {
                         currentUser = new Gson().fromJson(jsonResult, User.class);
                         populateUI();
@@ -106,10 +111,18 @@ public class ProfileFragment extends Fragment {
             public void onError(String message) {
                 if (getActivity() == null) return;
                 getActivity().runOnUiThread(() -> {
+                    showLoading(false);
                     Toast.makeText(getContext(), "Erro ao carregar perfil: " + message, Toast.LENGTH_LONG).show();
                 });
             }
         });
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (binding == null) return;
+
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.groupProfileContent.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
     }
 
     private void populateUI() {

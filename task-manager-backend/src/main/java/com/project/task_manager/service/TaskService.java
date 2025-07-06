@@ -127,7 +127,7 @@ public class TaskService {
             }
 
             User userToShareWith = userRepository.findByUsername(usernameToAdd)
-                    .orElseThrow(() -> new IllegalArgumentException("Usuário com username " + usernameToAdd + " não encontrado."));
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário com nome de usuário " + usernameToAdd + " não encontrado."));
 
             TaskShared shared = new TaskShared();
             shared.setTask(task);

@@ -3,6 +3,7 @@ package com.example.task_manager_mobile.ui.activities;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -41,6 +42,8 @@ public class CreateTaskActivity extends AppCompatActivity {
     private List<User> allUsersList = new ArrayList<>();
     private List<User> sharedUsersList = new ArrayList<>();
 
+    private int initialLoadCounter = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,7 +53,11 @@ public class CreateTaskActivity extends AppCompatActivity {
         baseApiCaller = new BaseApiCaller();
         sessionManager = new SessionManager(this);
 
+        showLoading(true);
+        initialLoadCounter = 1;
+
         if (getIntent().hasExtra(EXTRA_TASK)) {
+            initialLoadCounter++;
             taskToEdit = (Task) getIntent().getSerializableExtra(EXTRA_TASK);
             populateFieldsForEdit();
             loadInitialSharedUsers();
@@ -94,10 +101,13 @@ public class CreateTaskActivity extends AppCompatActivity {
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(CreateTaskActivity.this,
                             android.R.layout.simple_dropdown_item_1line, usernames);
                     binding.actvParticipants.setAdapter(adapter);
+                    onInitialLoadFinished();
                 });
             }
             @Override
-            public void onError(String message) {}
+            public void onError(String message) {
+                runOnUiThread(() -> onInitialLoadFinished());
+            }
         });
     }
 
@@ -112,10 +122,13 @@ public class CreateTaskActivity extends AppCompatActivity {
                     for (User user : sharedUsersList) {
                         addChipForUser(user.getUsername());
                     }
+                    onInitialLoadFinished();
                 });
             }
             @Override
-            public void onError(String message) {}
+            public void onError(String message) {
+                runOnUiThread(() -> onInitialLoadFinished());
+            }
         });
     }
 
@@ -205,6 +218,8 @@ public class CreateTaskActivity extends AppCompatActivity {
             status = TaskStatus.DONE;
         }
 
+        showSaving(true);
+
         Task taskData = new Task();
         taskData.setTitle(title);
         taskData.setDescription(description);
@@ -230,14 +245,17 @@ public class CreateTaskActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String result) {
                     runOnUiThread(() -> {
-                        Toast.makeText(CreateTaskActivity.this, "Tarefa atualizada!", Toast.LENGTH_SHORT).show();
+                        showSaving(false);
                         setResult(Activity.RESULT_OK);
                         finish();
                     });
                 }
                 @Override
                 public void onError(String message) {
-                    runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> {
+                        showSaving(false);
+                        Toast.makeText(CreateTaskActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show();
+                    });
                 }
             });
         } else {
@@ -245,6 +263,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String result) {
                     runOnUiThread(() -> {
+                        showSaving(false);
                         Toast.makeText(CreateTaskActivity.this, "Tarefa criada com sucesso!", Toast.LENGTH_SHORT).show();
                         setResult(Activity.RESULT_OK);
                         finish();
@@ -252,9 +271,29 @@ public class CreateTaskActivity extends AppCompatActivity {
                 }
                 @Override
                 public void onError(String message) {
-                    runOnUiThread(() -> Toast.makeText(CreateTaskActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> {
+                        showSaving(false);
+                        Toast.makeText(CreateTaskActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show();
+                    });
                 }
             });
         }
+    }
+    private void onInitialLoadFinished() {
+        initialLoadCounter--;
+        if (initialLoadCounter <= 0) {
+            showLoading(false);
+        }
+    }
+
+    private void showLoading(boolean isLoading) {
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.scrollViewContent.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    private void showSaving(boolean isSaving) {
+        binding.progressBar.setVisibility(isSaving ? View.VISIBLE : View.GONE);
+        binding.btnSave.setEnabled(!isSaving);
+        binding.btnCancel.setEnabled(!isSaving);
     }
 }

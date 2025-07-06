@@ -11,8 +11,8 @@ public class SignUpRequest {
     @NotBlank(message = "Informe um nome.")
     private String name;
 
-    @NotNull(message = "Username não pode ser nulo.")
-    @NotBlank(message = "Informe um username.")
+    @NotNull(message = "Nome de usuário não pode ser nulo.")
+    @NotBlank(message = "Informe um nome de usuário.")
     private String username;
 
     @NotNull(message = "Senha não pode ser nula.")

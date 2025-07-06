@@ -9,6 +9,17 @@
     android:padding="24dp"
     tools:context=".ui.activities.EditProfileActivity">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
@@ -19,6 +30,12 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_edit_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="edit_profile_image,text_tap_to_change,layout_edit_username,layout_edit_name,buttons_layout" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/edit_profile_image"
@@ -35,6 +52,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_title" />
 
     <TextView
+        android:id="@+id/text_tap_to_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/tap_to_change_picture"
@@ -78,6 +96,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
+        android:id="@+id/buttons_layout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

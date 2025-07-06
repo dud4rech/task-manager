@@ -68,11 +68,11 @@ public class AuthController {
         } catch (BadCredentialsException | UsernameNotFoundException e) {
             return ResponseEntity
                     .status(401)
-                    .body(Map.of("message", "Username ou senha inválidos."));
+                    .body("Nome de usuário ou senha inválidos.");
         } catch (Exception e) {
             return ResponseEntity
                     .status(500)
-                    .body(Map.of("message", "Um erro inesperado aconteceu."));
+                    .body("Um erro inesperado aconteceu.");
         }
     }
 }

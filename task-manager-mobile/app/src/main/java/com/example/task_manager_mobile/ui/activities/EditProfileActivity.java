@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.view.View;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -72,18 +73,23 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void loadUserDetails() {
+        showLoading(true, true);
         String token = sessionManager.getAuthToken();
         baseApiCaller.getUserById(String.valueOf(userId), token, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String user) {
                 Gson gson = new Gson();
                 currentUser = gson.fromJson(user, User.class);
-                runOnUiThread(() -> populateInitialData());
+                runOnUiThread(() -> {
+                    populateInitialData();
+                    showLoading(false, true);
+                });
             }
 
             @Override
             public void onError(String message) {
                 runOnUiThread(() -> {
+                    showLoading(false, true);
                     Toast.makeText(EditProfileActivity.this, "Erro ao carregar perfil: " + message, Toast.LENGTH_LONG).show();
                     finish();
                 });
@@ -139,13 +145,15 @@ public class EditProfileActivity extends AppCompatActivity {
             return;
         }
 
+        showLoading(true, false);
+
         String imageToSend = newProfilePicBase64 != null ? newProfilePicBase64 : currentUser.getProfilePicture();
 
          baseApiCaller.updateUser(userId, newUsername, newName, imageToSend, token, new BaseApiCaller.ApiCallback<String>() {
              @Override
              public void onSuccess(String updatedUser) {
                  runOnUiThread(() -> {
-                     Toast.makeText(EditProfileActivity.this, "Perfil atualizado com sucesso!", Toast.LENGTH_SHORT).show();
+                     showLoading(false, false);
                      setResult(Activity.RESULT_OK);
                      finish();
                  });
@@ -153,9 +161,23 @@ public class EditProfileActivity extends AppCompatActivity {
 
              @Override
              public void onError(String message) {
-                 runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show());
+                 runOnUiThread(() -> {
+                     showLoading(false, false);
+                     Toast.makeText(EditProfileActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show();
+                 });
              }
          });
+    }
+
+    private void showLoading(boolean isLoading, boolean isInitialLoad) {
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+
+        if (isInitialLoad) {
+            binding.groupEditContent.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
+        } else {
+            binding.btnSave.setEnabled(!isLoading);
+            binding.btnCancel.setEnabled(!isLoading);
+        }
     }
 
     private String uriToBase64(Uri uri) throws IOException {

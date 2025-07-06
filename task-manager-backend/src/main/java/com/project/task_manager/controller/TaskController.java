@@ -2,6 +2,7 @@ package com.project.task_manager.controller;
 
 import com.project.task_manager.dto.CreateTaskRequest;
 import com.project.task_manager.dto.ShareTaskRequest;
+import com.project.task_manager.dto.TaskDetailsResponse;
 import com.project.task_manager.model.Task;
 import com.project.task_manager.model.User;
 import com.project.task_manager.service.TaskService;
@@ -40,12 +41,17 @@ public class TaskController {
     public ResponseEntity<?> listAccessibleTaskById(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long id) {
         Optional<Task> task = taskService.findAccessibleTaskById(id, userDetails.getUsername());
 
-        if (task.isPresent()) {
-            return ResponseEntity.ok(task.get());
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("message", "Tarefa não encontrada."));
+        if (task.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tarefa não encontrada");
         }
+
+        List<User> users = taskService.findUsersByTaskId(id);
+
+        TaskDetailsResponse taskDetailsResponse = new TaskDetailsResponse();
+        taskDetailsResponse.setTask(task.get());
+        taskDetailsResponse.setUsers(users);
+
+        return ResponseEntity.ok(taskDetailsResponse);
     }
 
     @GetMapping("/{taskId}/shared-users")

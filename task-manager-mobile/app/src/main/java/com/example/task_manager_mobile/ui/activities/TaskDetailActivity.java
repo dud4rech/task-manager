@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -13,18 +14,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.databinding.ActivityTaskDetailBinding;
 import com.example.task_manager_mobile.dto.Task;
+import com.example.task_manager_mobile.dto.TaskDetailsResponse;
 import com.example.task_manager_mobile.dto.User;
 import com.example.task_manager_mobile.infrastructure.SessionManager;
 import com.example.task_manager_mobile.requests.BaseApiCaller;
 import com.example.task_manager_mobile.utils.Utils;
 import com.google.android.material.chip.Chip;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 public class TaskDetailActivity extends AppCompatActivity {
@@ -35,8 +33,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private BaseApiCaller baseApiCaller;
     private SessionManager sessionManager;
     private long taskId;
-    private Task currentTask;
-    private List<User> sharedUsersList = new ArrayList<>();
+    private TaskDetailsResponse currentTask;
 
     private final ActivityResultLauncher<Intent> editTaskLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -66,7 +63,6 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         setupClickListeners();
         loadTaskDetails();
-        loadInitialSharedUsers();
     }
 
     private void setupClickListeners() {
@@ -75,7 +71,7 @@ public class TaskDetailActivity extends AppCompatActivity {
         binding.btnEdit.setOnClickListener(v -> {
             if (currentTask != null) {
                 Intent intent = new Intent(TaskDetailActivity.this, CreateTaskActivity.class);
-                intent.putExtra(CreateTaskActivity.EXTRA_TASK, currentTask);
+                intent.putExtra(CreateTaskActivity.EXTRA_TASK, currentTask.getTask());
                 editTaskLauncher.launch(intent);
             } else {
                 Toast.makeText(this, "Aguarde os detalhes da tarefa carregarem.", Toast.LENGTH_SHORT).show();
@@ -87,30 +83,12 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
     }
 
-    private void loadInitialSharedUsers() {
-        baseApiCaller.getSharedUsersForTask(taskId, sessionManager.getAuthToken(), new BaseApiCaller.ApiCallback<String>() {
-            @Override
-            public void onSuccess(String users) {
-                Gson gson = new Gson();
-                Type listType = new TypeToken<List<User>>() {}.getType();
-                sharedUsersList = gson.fromJson(users, listType);
-                runOnUiThread(() -> {
-                    for (User user : sharedUsersList) {
-                        addChipForUser(user.getUsername());
-                    }
-                });
-            }
-            @Override
-            public void onError(String message) {}
-        });
-    }
-
     private void addChipForUser(String username) {
         Chip chip = new Chip(this);
         chip.setText(username);
         chip.setOnCloseIconClickListener(v -> {
             binding.chipgroupParticipants.removeView(chip);
-            sharedUsersList.removeIf(user -> user.getUsername().equals(username));
+            currentTask.getUsers().removeIf(user -> user.getUsername().equals(username));
         });
         binding.chipgroupParticipants.addView(chip);
     }
@@ -127,6 +105,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     }
 
     private void performTaskDeletion() {
+        showLoading(true);
         String token = sessionManager.getAuthToken();
         baseApiCaller.deleteTask(String.valueOf(taskId), token, new BaseApiCaller.ApiCallback<String>() {
             @Override
@@ -140,24 +119,41 @@ public class TaskDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(String message) {
-                runOnUiThread(() -> Toast.makeText(TaskDetailActivity.this, "Erro ao excluir: " + message, Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> {
+                    showLoading(false);
+                    Toast.makeText(TaskDetailActivity.this, "Erro ao excluir: " + message, Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
 
     private void loadTaskDetails() {
+        showLoading(true);
         String token = sessionManager.getAuthToken();
         baseApiCaller.getTaskById(String.valueOf(taskId), token, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
                 Gson gson = new Gson();
-                currentTask = gson.fromJson(result, Task.class);
-                runOnUiThread(() -> populateUI(currentTask));
+                currentTask = gson.fromJson(result, TaskDetailsResponse.class);
+                runOnUiThread(() -> {
+                    populateUI(currentTask.getTask());
+
+                    binding.chipgroupParticipants.removeAllViews();
+
+                    for (User user : currentTask.getUsers()) {
+                        addChipForUser(user.getUsername());
+                    }
+
+                    showLoading(false);
+                });
             }
 
             @Override
             public void onError(String message) {
-                runOnUiThread(() -> Toast.makeText(TaskDetailActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show());
+                runOnUiThread(() -> {
+                    showLoading(false);
+                    Toast.makeText(TaskDetailActivity.this, "Erro: " + message, Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
@@ -181,5 +177,11 @@ public class TaskDetailActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (binding == null) return;
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.mainContent.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
     }
 }

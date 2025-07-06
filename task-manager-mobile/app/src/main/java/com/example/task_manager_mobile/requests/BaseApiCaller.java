@@ -19,7 +19,7 @@ import okhttp3.ResponseBody;
 
 public class BaseApiCaller {
 
-    public static final String BASE_URL = "https://2137-2804-14c-f286-918d-3c4c-ca3b-480-5a14.ngrok-free.app/";
+    public static final String BASE_URL = "http://192.168.0.28:8080/";
     private static final OkHttpClient client = new OkHttpClient();
     private static final Gson gson = new Gson();
     public static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
