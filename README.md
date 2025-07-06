@@ -5,7 +5,7 @@ Este é um projeto é Full-Stack desenvolvido em **Java** com **Spring Boot** e 
 
 **Alunos:**
 - André Eduardo Schmitz
-- Ana Beatriz Marins da Silva
+- Ana Beatriz Martins da Silva
 - Eduarda Stipp Rech
 - Mariana Rossdeutrscher Waltrick Lima
 
