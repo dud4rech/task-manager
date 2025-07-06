@@ -18,4 +18,6 @@ public class SignUpRequest {
     @NotNull(message = "Senha não pode ser nula.")
     @NotBlank(message = "Informe uma senha.")
     private String password;
+
+    private String profilePicture;
 }

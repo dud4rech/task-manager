@@ -44,6 +44,7 @@ public class UserService implements UserDetailsService {
                 .name(request.getName())
                 .username(request.getUsername())
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .profilePicture(request.getProfilePicture())
                 .isActive(true)
                 .build();
 
@@ -105,4 +106,5 @@ public class UserService implements UserDetailsService {
 
         user.setProfilePicture(image);
         userRepository.save(user);
-    }}
+    }
+}

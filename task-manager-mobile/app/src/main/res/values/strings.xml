@@ -42,4 +42,5 @@
     <string name="description_task">Descrição</string>
     <string name="participants">Participantes</string>
     <string name="add_participant_hint">Digite o nome de usuário</string>
+    <string name="add_profile_picture">Clique para adicionar sua foto de perfil</string>
 </resources>

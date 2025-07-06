@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -13,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.task_manager_mobile.R;
@@ -27,20 +26,15 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
-// package com.example.task_manager_mobile.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
-// ... outros imports
 
-import com.example.task_manager_mobile.ui.activities.CreateTaskActivity; // Importe a nova Activity
+import com.example.task_manager_mobile.ui.activities.CreateTaskActivity;
 
 public class TasksFragment extends Fragment {
 
@@ -74,11 +68,19 @@ public class TasksFragment extends Fragment {
         setupDependencies();
         setupRecyclerView();
         setupFilters();
+        setupSwipeRefresh();
         loadTasks();
 
         binding.fabAddTask.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), CreateTaskActivity.class);
             createTaskLauncher.launch(intent);
+        });
+    }
+
+    private void setupSwipeRefresh() {
+        binding.swipeRefreshLayout.setColorSchemeResources(R.color.purple_500);
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            loadTasks();
         });
     }
 
@@ -121,13 +123,23 @@ public class TasksFragment extends Fragment {
 
     private void loadTasks() {
         String token = sessionManager.getAuthToken();
-        if (token == null) return;
+        if (token == null) {
+            binding.swipeRefreshLayout.setRefreshing(false);
+            return;
+        }
+
+        if (!binding.swipeRefreshLayout.isRefreshing()) {
+            showLoading(true);
+        }
 
         baseApiCaller.listTasks(token, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String jsonResult) {
-                if (getActivity() == null) return;
+                if (getActivity() == null || binding == null) return;
                 getActivity().runOnUiThread(() -> {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    showLoading(false);
+
                     try {
                         Type listType = new TypeToken<ArrayList<Task>>() {}.getType();
                         allTasks = new Gson().fromJson(jsonResult, listType);
@@ -145,9 +157,22 @@ public class TasksFragment extends Fragment {
             @Override
             public void onError(String message) {
                 if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_LONG).show());
+                getActivity().runOnUiThread(() -> {
+                    binding.swipeRefreshLayout.setRefreshing(false);
+                    showLoading(false);
+
+                    allTasks.clear();
+                    applyFilters();
+                    Toast.makeText(getContext(), "Erro: " + message, Toast.LENGTH_LONG).show();
+                });
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadTasks();
     }
 
     private void applyFilters() {
@@ -167,7 +192,22 @@ public class TasksFragment extends Fragment {
                     .collect(Collectors.toList());
         }
 
+        if (filteredList.isEmpty()) {
+            binding.recyclerViewTasks.setVisibility(View.GONE);
+            binding.textViewEmpty.setVisibility(View.VISIBLE);
+        } else {
+            binding.recyclerViewTasks.setVisibility(View.VISIBLE);
+            binding.textViewEmpty.setVisibility(View.GONE);
+        }
+
         taskAdapter.submitList(filteredList);
+    }
+
+    private void showLoading(boolean isLoading) {
+        if (binding == null) return;
+
+        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        binding.mainContent.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
     }
 
     @Override

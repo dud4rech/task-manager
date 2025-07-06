@@ -13,12 +13,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.task_manager_mobile.R;
 import com.example.task_manager_mobile.databinding.ActivityTaskDetailBinding;
 import com.example.task_manager_mobile.dto.Task;
+import com.example.task_manager_mobile.dto.User;
 import com.example.task_manager_mobile.infrastructure.SessionManager;
 import com.example.task_manager_mobile.requests.BaseApiCaller;
 import com.example.task_manager_mobile.utils.Utils;
+import com.google.android.material.chip.Chip;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class TaskDetailActivity extends AppCompatActivity {
@@ -30,6 +36,7 @@ public class TaskDetailActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private long taskId;
     private Task currentTask;
+    private List<User> sharedUsersList = new ArrayList<>();
 
     private final ActivityResultLauncher<Intent> editTaskLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -59,6 +66,7 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         setupClickListeners();
         loadTaskDetails();
+        loadInitialSharedUsers();
     }
 
     private void setupClickListeners() {
@@ -79,6 +87,34 @@ public class TaskDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void loadInitialSharedUsers() {
+        baseApiCaller.getSharedUsersForTask(taskId, sessionManager.getAuthToken(), new BaseApiCaller.ApiCallback<String>() {
+            @Override
+            public void onSuccess(String users) {
+                Gson gson = new Gson();
+                Type listType = new TypeToken<List<User>>() {}.getType();
+                sharedUsersList = gson.fromJson(users, listType);
+                runOnUiThread(() -> {
+                    for (User user : sharedUsersList) {
+                        addChipForUser(user.getUsername());
+                    }
+                });
+            }
+            @Override
+            public void onError(String message) {}
+        });
+    }
+
+    private void addChipForUser(String username) {
+        Chip chip = new Chip(this);
+        chip.setText(username);
+        chip.setOnCloseIconClickListener(v -> {
+            binding.chipgroupParticipants.removeView(chip);
+            sharedUsersList.removeIf(user -> user.getUsername().equals(username));
+        });
+        binding.chipgroupParticipants.addView(chip);
+    }
+
     private void showDeleteConfirmationDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Confirmar Exclusão")
@@ -86,7 +122,7 @@ public class TaskDetailActivity extends AppCompatActivity {
                 .setPositiveButton("Excluir", (dialog, which) -> {
                     performTaskDeletion();
                 })
-                .setNegativeButton("Cancelar", null) // "Cancelar" apenas fecha o diálogo
+                .setNegativeButton("Cancelar", null)
                 .show();
     }
 

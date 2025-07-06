@@ -27,7 +27,6 @@ public class LoginActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
 
-        // Esconde a ActionBar
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -74,7 +73,6 @@ public class LoginActivity extends AppCompatActivity {
         baseApiCaller.login(username, password, new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String result) {
-                // Roda na thread principal para poder atualizar a UI
                 runOnUiThread(() -> {
                     try {
                         Gson gson = new Gson();

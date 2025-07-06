@@ -3,7 +3,6 @@ package com.example.task_manager_mobile.ui.activities;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -54,12 +53,10 @@ public class CreateTaskActivity extends AppCompatActivity {
         if (getIntent().hasExtra(EXTRA_TASK)) {
             taskToEdit = (Task) getIntent().getSerializableExtra(EXTRA_TASK);
             populateFieldsForEdit();
-
-            binding.participantsSection.setVisibility(View.VISIBLE);
-            loadAllUsersForAutocomplete();
             loadInitialSharedUsers();
         }
 
+        loadAllUsersForAutocomplete();
         setupClickListeners();
     }
 
@@ -105,9 +102,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
     private void loadInitialSharedUsers() {
-        String taskId = String.valueOf(taskToEdit.getId());
-
-        baseApiCaller.getSharedUsersForTask(taskId, sessionManager.getAuthToken(), new BaseApiCaller.ApiCallback<String>() {
+        baseApiCaller.getSharedUsersForTask(taskToEdit.getId(), sessionManager.getAuthToken(), new BaseApiCaller.ApiCallback<String>() {
             @Override
             public void onSuccess(String users) {
                 Gson gson = new Gson();
@@ -128,17 +123,15 @@ public class CreateTaskActivity extends AppCompatActivity {
         String username = binding.actvParticipants.getText().toString();
         if (username.isEmpty()) return;
 
-        // Verifica se o usuário existe na lista geral e se já não foi adicionado
         boolean userExists = allUsersList.stream().anyMatch(u -> u.getUsername().equals(username));
         boolean alreadyAdded = sharedUsersList.stream().anyMatch(u -> u.getUsername().equals(username));
 
         if (userExists && !alreadyAdded) {
-            // Encontra o objeto User completo para adicionar à lista
             User userToAdd = allUsersList.stream().filter(u -> u.getUsername().equals(username)).findFirst().orElse(null);
             if (userToAdd != null) {
                 sharedUsersList.add(userToAdd);
                 addChipForUser(username);
-                binding.actvParticipants.setText(""); // Limpa o campo
+                binding.actvParticipants.setText("");
             }
         } else {
             Toast.makeText(this, "Usuário inválido ou já adicionado", Toast.LENGTH_SHORT).show();

@@ -40,7 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         try {
             userId = jwtService.extractUserId(token);
-        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+            } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
             response.getWriter().write("{\"message\":\"Token expirado. Faça login novamente.\"}");

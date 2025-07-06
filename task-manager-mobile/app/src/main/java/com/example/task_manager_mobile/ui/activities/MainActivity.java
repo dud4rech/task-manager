@@ -3,6 +3,7 @@ package com.example.task_manager_mobile.ui.activities;
 import android.os.Bundle;
 
 import com.example.task_manager_mobile.R;
+import com.example.task_manager_mobile.infrastructure.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;

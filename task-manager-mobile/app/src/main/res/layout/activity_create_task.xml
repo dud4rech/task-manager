@@ -200,7 +200,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="16dp"
-                android:visibility="gone"
                 tools:visibility="visible">
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/chipgroup_participants"

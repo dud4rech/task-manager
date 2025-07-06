@@ -85,7 +85,7 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onError(String message) {
                 runOnUiThread(() -> {
                     Toast.makeText(EditProfileActivity.this, "Erro ao carregar perfil: " + message, Toast.LENGTH_LONG).show();
-                    finish(); // Fecha a tela se não conseguir carregar os dados
+                    finish();
                 });
             }
         });
