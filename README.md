@@ -13,7 +13,7 @@ Este é um projeto é Full-Stack desenvolvido em **Java** com **Spring Boot** e 
 
 ## Como executar?
 
-Antes de começar, garanta que você tenha os seguintes softwares instalados em sua máquina:
+Garanta que você tenha os seguintes softwares instalados em sua máquina:
 
 -   **JDK 17 ou superior:** Para executar o backend.
 -   **PostgreSQL:** O banco de dados da aplicação.
@@ -48,9 +48,7 @@ Antes de começar, garanta que você tenha os seguintes softwares instalados em 
     ```
     -   Por padrão, o servidor rodará na porta `8080`.
 
----
-
-### 📱 2. Configuração do Frontend (Aplicativo Android)
+### 2. Configuração do Frontend (Aplicativo Android)
 
 1.  **Configure o Endereço da API (BASE_URL):**
     -   Abra o arquivo `/task-manager/task-manager-mobile/app/src/main/java/com/example/task_manager_mobile/requests/BaseApiCaller.java`.
