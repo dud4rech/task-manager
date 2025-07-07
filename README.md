@@ -20,8 +20,6 @@ Garanta que você tenha os seguintes softwares instalados em sua máquina:
 -   **Android Studio:** Para executar o aplicativo mobile.
 -   **Maven:** Para gerenciar as dependências e o build do backend.
 
----
-
 ### 1. Configuração do Backend (Servidor)
 
 1.  **Crie o Banco de Dados:**
